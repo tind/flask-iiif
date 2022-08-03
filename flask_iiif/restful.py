@@ -13,6 +13,7 @@ import datetime
 from email.utils import parsedate
 from io import BytesIO
 
+import funcsigs
 from flask import Response, current_app, jsonify, redirect, request, send_file, url_for
 from flask_restful import Resource
 from flask_restful.utils import cors
@@ -61,7 +62,7 @@ class IIIFImageInfo(Resource):
         iiif_before_info_request.send(self, version=version, uuid=uuid)
 
         # build the image key
-        key = "iiif:info:{0}/{1}".format(version, uuid)
+        key = u"iiif:info:{0}/{1}".format(version, uuid)
 
         # Check if its cached
         try:
@@ -146,7 +147,7 @@ class IIIFImageAPI(Resource):
         IIIFImageAPIWrapper.validate_api(**api_parameters)
 
         # build the image key
-        key = "iiif:{0}/{1}/{2}/{3}/{4}.{5}".format(
+        key = u"iiif:{0}/{1}/{2}/{3}/{4}.{5}".format(
             uuid, region, size, quality, rotation, image_format
         )
 
@@ -203,25 +204,29 @@ class IIIFImageAPI(Resource):
         send_file_kwargs = {"mimetype": mimetype}
         # last_modified is not supported before flask 0.12
         additional_headers = []
-        if last_modified:
-            send_file_kwargs.update(last_modified=last_modified)
 
         if "dl" in request.args:
             filename = secure_filename(request.args.get("dl", ""))
             if filename.lower() in {"", "1", "true"}:
-                filename = "{0}-{1}-{2}-{3}-{4}.{5}".format(
+                filename = u"{0}-{1}-{2}-{3}-{4}.{5}".format(
                     uuid, region, size, quality, rotation, image_format
                 )
-            send_file_kwargs.update(
-                as_attachment=True,
-                attachment_filename=secure_filename(filename),
-            )
+            # Necessary to support both flask 1.0 and 2.0
+            for arg in funcsigs.signature(send_file).parameters:
+                if arg in {"attachment_filename", "download_name"}:
+                    send_file_kwargs.update({
+                        "as_attachment": True,
+                        arg: secure_filename(filename)
+                    })
+                    break
         if_modified_since_raw = request.headers.get("If-Modified-Since")
         if if_modified_since_raw:
             if_modified_since = datetime.datetime(*parsedate(if_modified_since_raw)[:6])
             if if_modified_since and if_modified_since >= last_modified:
                 return Response(status=304)
         response = send_file(to_serve, **send_file_kwargs)
+        if last_modified:
+            response.last_modified = last_modified
         if additional_headers:
             response.headers.extend(additional_headers)
         return response

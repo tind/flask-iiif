@@ -19,6 +19,13 @@ from flask_testing import TestCase
 class IIIFTestCase(TestCase):
     """IIIF REST test case."""
 
+    def assertRaisesRegexCompat(self, *args, **kwargs):
+        """Allow to call assertRaisesRegex in a 2-and-3 compatible way."""
+        if hasattr(self, "assertRaisesRegex"):
+            self.assertRaisesRegex(*args, **kwargs)
+        else:
+            self.assertRaisesRegexp(*args, **kwargs)
+
     def create_app(self):
         """Create the app."""
         from flask_restful import Api
