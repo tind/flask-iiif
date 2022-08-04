@@ -538,7 +538,10 @@ class IIIFImageAPIWrapper(MultimediaImage):
 
         for key in order:
             # Ignore if has the ignore value for the specific key
-            if kwargs.get(key) != cases.get(key, {}).get("ignore"):
+            ignore = cases.get(key, {}).get("ignore")
+            if not isinstance(ignore, list):
+                ignore = [ignore]
+            if kwargs.get(key) not in ignore:
                 tools.get(key)(kwargs.get(key))
 
     def apply_region(self, value):
