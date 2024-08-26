@@ -11,27 +11,21 @@ name: CI
 
 on:
   push:
-    branches: master
+    branches: [master]
   pull_request:
-    branches: master
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron:  '0 3 * * 6'
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Reason'
-        required: false
-        default: 'Manual trigger'
+    branches: [master]
 
 jobs:
   Tests:
     runs-on: ubuntu-20.04
+    services:
+      redis:
+        image: redis:6
+        ports:
+          - 6379:6379
     strategy:
       matrix:
-          python-version: [3.7, 3.8, 3.9]
-          requirements-level: [pypi]
-          cache-service: [redis]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     env:
       CACHE: ${{ matrix.cache-service }}
@@ -45,24 +39,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Generate dependencies
-        run: |
-          pip install wheel requirements-builder
-          requirements-builder -e "$EXTRAS" --level=${{ matrix.requirements-level }} setup.py > .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
-
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('.${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt') }}
-
       - name: Install dependencies
         run: |
-          pip install -r .${{ matrix.requirements-level }}-${{ matrix.python-version }}-requirements.txt
-          pip install ".[$EXTRAS]"
+          pip install -e .[tests,docs]
           pip freeze
-          docker --version
-          docker-compose --version
 
       - name: Run tests
         run: |

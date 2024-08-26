@@ -10,9 +10,9 @@
 """Test REST API."""
 
 from io import BytesIO
-from unittest.mock import patch
 
 from flask import url_for
+from mock import patch
 from PIL import Image
 from werkzeug.utils import secure_filename
 
@@ -34,10 +34,10 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         from flask import jsonify
 
         id_v1 = url_for(
-            "iiifimagebase", uuid="valid:id-üni", version="v1", _external=True
+            "iiifimagebase", uuid=u"valid:id-üni", version="v1", _external=True
         )
         id_v2 = url_for(
-            "iiifimagebase", uuid="valid:id-üni", version="v2", _external=True
+            "iiifimagebase", uuid=u"valid:id-üni", version="v2", _external=True
         )
 
         expected = {
@@ -69,7 +69,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageinfo",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v2",
             ),
         )
@@ -77,7 +77,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageinfo",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v2",
             ),
         )
@@ -86,7 +86,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageinfo",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v1",
             ),
         )
@@ -125,7 +125,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageapi",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v2",
                 region="full",
                 size="full",
@@ -141,7 +141,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageapi",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v1",
                 region="200",
                 size="full",
@@ -162,7 +162,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageapi",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v2",
                 region="full",
                 size="full",
@@ -183,7 +183,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         get_the_response = self.get(
             "iiifimageapi",
             urlargs=dict(
-                uuid="valid:id-üni",
+                uuid=u"valid:id-üni",
                 version="v2",
                 region="full",
                 size="full",
@@ -197,7 +197,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         self.assertEqual(get_the_response.status_code, 304)
 
         urlargs = dict(
-            uuid="valid:id-üni",
+            uuid=u"valid:id-üni",
             version="v2",
             region="200,200,200,200",
             size="300,300",
@@ -250,7 +250,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
     def test_api_abort_all_methods_except_get(self):
         """Abort all methods but GET."""
         data = dict(
-            uuid="valid:id-üni",
+            uuid=u"valid:id-üni",
             version="v2",
             region="full",
             size="full",
@@ -274,7 +274,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         """Test cache-control headers"""
 
         urlargs = dict(
-            uuid="valid:id-üni",
+            uuid=u"valid:id-üni",
             version="v2",
             region="200,200,200,200",
             size="300,300",
@@ -283,7 +283,7 @@ class TestRestAPI(IIIFTestCaseWithRedis):
             image_format="pdf",
         )
 
-        key = "iiif:{0}/{1}/{2}/{3}/{4}.{5}".format(
+        key = u"iiif:{0}/{1}/{2}/{3}/{4}.{5}".format(
             urlargs["uuid"],
             urlargs["region"],
             urlargs["size"],
@@ -355,10 +355,10 @@ class TestRestAPI(IIIFTestCaseWithRedis):
         cache = self.app.config["IIIF_CACHE_HANDLER"].cache
         with patch.object(cache, "get", side_effect=Exception("test fail")):
             # Without ignoring errors
-            self.assertRaisesRegex(
+            self.assertRaisesRegexCompat(
                 Exception, "test fail", self.get, "iiifimageinfo", urlargs=info_args
             )
-            self.assertRaisesRegex(
+            self.assertRaisesRegexCompat(
                 Exception, "test fail", self.get, "iiifimageapi", urlargs=api_args
             )
 

@@ -128,9 +128,9 @@ IIIF_VALIDATIONS = {
             "validate": "(^full|(pct:)?([\d.]+,){3}([\d.]+))",
         },
         "size": {
-            "ignore": "full",
+            "ignore": ["full", "max"],
             "validate": (
-                "(^full|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+," "[\d.]+|![\d.]+,[\d.]+)"
+                "(^full|max|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+," "[\d.]+|![\d.]+,[\d.]+)"
             ),
         },
         "rotation": {"ignore": "0", "validate": "^!?[\d.]+$"},
