@@ -75,6 +75,8 @@ class IIIFImageInfo(Resource):
 
         # If the image size is cached loaded from cache
         if cached:
+            if isinstance(cached, bytes):
+                cached = cached.decode()
             width, height = map(int, cached.split(","))
         else:
             data = current_iiif.uuid_to_image_opener(uuid)
