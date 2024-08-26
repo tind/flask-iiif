@@ -32,6 +32,7 @@ tests_require = [
     'itsdangerous',
     'sphinx',
     'redis',
+    'werkzeug<3.0'
 ]
 
 install_requires = [
