@@ -12,17 +12,10 @@ name: CI
 on:
   push:
     branches:
-      - master
-      - "feature/*"
-      - "maint-**"
+      - "local/master"
   pull_request:
     branches:
-      - master
-      - "maint-**"
-      - "feature/**"
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: "0 3 * * 6"
+      - "local/master"
   workflow_dispatch:
     inputs:
       reason:
@@ -31,7 +24,37 @@ on:
         default: "Manual trigger"
 
 jobs:
-  Python:
-      uses: inveniosoftware/workflows/.github/workflows/tests-python.yml@master
-      with:
-        extras: "tests"
+  Tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.14"]
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - "6379:6379"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: setup.cfg
+
+      - name: Install dependencies
+        run: |
+          pip install ".[tests]"
+          pip freeze
+
+      - name: Build docs
+        run: python -m sphinx.cmd.build -qnN docs docs/_build/html
+
+      - name: Run tests
+        run: python -m pytest
