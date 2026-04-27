@@ -151,6 +151,34 @@ class TestRestAPI(IIIFTestCase):
         )
         self.assert400(get_the_response)
 
+        get_the_response = self.get(
+            "iiifimageapi",
+            urlargs=dict(
+                uuid="valid:id-üni",
+                version="v2",
+                region="full",
+                size="maximum",
+                rotation="0",
+                quality="default",
+                image_format="png",
+            ),
+        )
+        self.assert400(get_the_response)
+
+        get_the_response = self.get(
+            "iiifimageapi",
+            urlargs=dict(
+                uuid="valid:id-üni",
+                version="v2",
+                region="full",
+                size="fullness",
+                rotation="0",
+                quality="default",
+                image_format="png",
+            ),
+        )
+        self.assert400(get_the_response)
+
     def test_api_stream_image(self):
         """Test API stream image."""
         tmp_file = BytesIO()
@@ -194,6 +222,21 @@ class TestRestAPI(IIIFTestCase):
         )
 
         self.assertEqual(get_the_response.status_code, 304)
+
+        get_the_response = self.get(
+            "iiifimageapi",
+            urlargs=dict(
+                uuid="valid:id-üni",
+                version="v2",
+                region="full",
+                size="max",
+                rotation="0",
+                quality="default",
+                image_format="png",
+            ),
+        )
+        self.assert200(get_the_response)
+        self.assertEqual(get_the_response.data, tmp_file.getvalue())
 
         urlargs = dict(
             uuid="valid:id-üni",

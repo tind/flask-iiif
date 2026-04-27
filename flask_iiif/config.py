@@ -115,7 +115,7 @@ IIIF_VALIDATIONS = {
         "size": {
             "ignore": "full",
             "validate": (
-                r"(^full|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+,[\d.]+|![\d.]+,[\d.]+)"
+                r"(^full$|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+,[\d.]+|![\d.]+,[\d.]+)"
             ),
         },
         "rotation": {"ignore": "0", "validate": r"^[\d.]+$"},
@@ -131,9 +131,9 @@ IIIF_VALIDATIONS = {
             "validate": r"(^full|(pct:)?([\d.]+,){3}([\d.]+))",
         },
         "size": {
-            "ignore": "full",
+            "ignore": ["full", "max"],
             "validate": (
-                r"(^full|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+,[\d.]+|![\d.]+,[\d.]+)"
+                r"(^full$|^max$|[\d.]+,|,[\d.]+|pct:[\d.]+|[\d.]+,[\d.]+|![\d.]+,[\d.]+)"
             ),
         },
         "rotation": {"ignore": "0", "validate": r"^!?[\d.]+$"},
